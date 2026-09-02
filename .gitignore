@@ -1,4 +1,4 @@
 node_modules/
 .env
-data/consumed.json
+**/data/consumed.json
 *.log
