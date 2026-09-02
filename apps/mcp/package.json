@@ -1,14 +1,14 @@
 {
-  "name": "@xpay/asp",
+  "name": "@xpay/mcp",
   "version": "0.1.0",
   "type": "module",
   "scripts": {
     "start": "node --dns-result-order=ipv4first src/server.js",
-    "test": "node --dns-result-order=ipv4first --test test/*.test.js"
+    "cli": "node --dns-result-order=ipv4first src/client.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",
     "@xpay/core": "0.1.0",
-    "zod": "^3.25.76"
+    "zod": "^3.23.0"
   }
 }

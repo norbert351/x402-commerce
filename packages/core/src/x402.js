@@ -27,8 +27,12 @@ export function acceptedEntry(resource, description) {
     payTo: config.payTo,
     maxTimeoutSeconds: config.maxTimeoutSeconds,
     description,
-    extra: JSON.stringify({ name: 'USDC', version: '2' }), // MUST be a string
+    extra: JSON.stringify({ name: tokenLabel(), version: '2' }), // MUST be a string; label tracks the settle asset
   };
+}
+
+function tokenLabel() {
+  return config.chainId === 97 ? 'United Stables ($U)' : 'USDC';
 }
 
 export function toPaymentMessage(accepted) {

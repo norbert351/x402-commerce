@@ -1,5 +1,5 @@
 import { createWalletClient, createPublicClient, http, parseAbi } from 'viem';
-import { baseSepolia } from 'viem/chains';
+import { baseSepolia, bscTestnet } from 'viem/chains';
 import { privateKeyToAccount } from 'viem/accounts';
 import { config, EIP712_DOMAIN, EIP712_TYPES, toPaymentMessage, buildReplayBytes } from '@xpay/core';
 
@@ -10,10 +10,11 @@ import { config, EIP712_DOMAIN, EIP712_TYPES, toPaymentMessage, buildReplayBytes
 const KEY = process.env.XPAY_BUYER_KEY || process.env.XPAY_SELLER_KEY || process.env.SENTINEL_PK || '';
 if (KEY.length < 64) throw new Error('XPAY_BUYER_KEY / SENTINEL_PK not set');
 
+const CHAIN = config.chainId === 97 ? bscTestnet : config.chainId === 84532 ? baseSepolia : { id: config.chainId };
 const account = privateKeyToAccount(KEY);
-const wallet = createWalletClient({ account, chain: baseSepolia, transport: http(config.rpcUrl) });
-const publicClient = createPublicClient({ chain: baseSepolia, transport: http(config.rpcUrl) });
-const USDC = parseAbi(['function transfer(address to, uint256 amount) returns (bool)']);
+const wallet = createWalletClient({ account, chain: CHAIN, transport: http(config.rpcUrl) });
+const publicClient = createPublicClient({ chain: CHAIN, transport: http(config.rpcUrl) });
+const TOKEN = parseAbi(['function transfer(address to, uint256 amount) returns (bool)']);
 
 export async function buy(endpointUrl, { symbol = 'BTCUSDT', priceOverride } = {}) {
   const resource = endpointUrl.replace(/\/$/, '');
@@ -30,7 +31,7 @@ export async function buy(endpointUrl, { symbol = 'BTCUSDT', priceOverride } = {
   // 3. settle on-chain: plain transfer, no approve needed (USDC EIP-3009 / direct transfer)
   const amount = priceOverride !== undefined ? BigInt(priceOverride) : BigInt(accepted.amount);
   const tx = await wallet.writeContract({
-    address: accepted.asset, abi: USDC, functionName: 'transfer',
+    address: accepted.asset, abi: TOKEN, functionName: 'transfer',
     args: [accepted.payTo, amount],
   });
   const receipt = await publicClient.waitForTransactionReceipt({ hash: tx }); // wait until MINED so the seller's on-chain scan sees it

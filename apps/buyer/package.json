@@ -6,6 +6,8 @@
     "start": "node --dns-result-order=ipv4first src/buy.js"
   },
   "dependencies": {
-    "@xpay/core": "0.1.0"
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@xpay/core": "0.1.0",
+    "zod": "^3.25.76"
   }
 }

@@ -68,10 +68,20 @@ Chain-parametrised via `.env`. Default is **Base Sepolia USDC** `0x036CbD53842c5
 ## Run
 
 ```bash
-npm run asp           # start the sell-side ASP (default :3000)
+npm run asp           # start the sell-side ASP (default :3000, Base Sepolia / USDC)
 # in another shell:
 XPAY_BUYER_KEY=$KEY npm run buy "http://localhost:3000/v1/market" BTCUSDT
 ```
+
+**Switch to the Binance Agent OS (BNB) rail** — BSC testnet, settle in **$U** (United Stables, 18-dec, the BNB agent economy's settlement stable — NOT USDT, which is mainnet-only):
+
+```bash
+XPAY_ENV_FILE=.env.bnb XPAY_PORT=3020 npm run asp    # sell side on chain 97 / $U
+# buyer (needs a BSC-funded key with BNB + $U to settle live)
+XPAY_ENV_FILE=.env.bnb XPAY_BUYER_KEY=<bsc-key> npm run buy "http://localhost:3020/v1/market" BTCUSDT
+```
+
+The gate and buyer are chain-agnostic: Base-Sepolia (USDC) is the fail-open default; BNB ($U eip3009) is wired and its negative paths are verified against the live BSC testnet. A **positive on-BNB settle→serve is the one path not yet live-exercised** — it needs a BSC-funded key (BNB for gas + $U).
 
 Full loop already verified live on Base Sepolia (real on-chain USDC):
 
@@ -99,12 +109,14 @@ second replay: 402 - {"code":"payment_already_used","detail":"tx already consume
 - [x] Buy-side agent client (probe → settle → sign → replay)
 - [x] Replay protection verified on-chain (negative matrix)
 - [x] Chain-parametrised `.env` (swap Base-Sepolia ⇄ BNB)
-- [ ] MCP Server binding (Streamable HTTP / stdio tool surface)
+- [x] **MCP Server binding** (stdio; `get_market_data` x402-priced + `get_quote`)
+- [x] **BNB rail wired** (chain 97 / $U; negative paths verified against live BSC testnet)
+- [ ] BNB positive settle→serve (needs BSC-funded key: BNB gas + $U)
 - [ ] Ledger/audit persistence (postgres) + spend-budget enforcement UI
-- [ ] Real Binance Agent OS x402 rail (BNB) wiring
+- [ ] Real Binance Agent OS MCP-Hub / x402 rail (mainnet) wiring
 - [ ] Deploy (Render) + keep-alive for judged demo window
 
 ## Honest limits (verified vs unverified)
 
-- **Verified**: live Base-Sepolia on-chain settlement + replay protection, live Binance market-data feed reachable+served behind the gate; 6/6 test suite; node v22 / viem 2.56 / @x402 SDK compatibility.
-- **Unverified / inferred**: no official Track A judging rubric published (open call); BNB-chain settlement constants not yet exercised live; real Binance Agent OS MCP-Hub integration is a config swap, not yet wired/tested.
+- **Verified**: live Base-Sepolia on-chain settlement + replay protection, live Binance market-data feed reachable+served behind the gate; MCP stdio loop (unsigned→challenge, paid→serve) live on-chain; BNB rail challenge shape + negative rejection on live BSC testnet; 11/11 test suite; node v22 / viem 2.56 / @x402 / MCP-SDK compatibility.
+- **Unverified / inferred**: no official Track A judging rubric published (open call); positive on-BNB $U settle→serve not yet live-exercised (no BSC-funded key); real Binance Agent OS MCP-Hub / mainnet rail is a config swap, not yet wired/tested.
