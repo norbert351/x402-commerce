@@ -1,0 +1,11 @@
+{
+  "name": "@xpay/buyer",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "start": "node --dns-result-order=ipv4first src/buy.js"
+  },
+  "dependencies": {
+    "@xpay/core": "0.1.0"
+  }
+}

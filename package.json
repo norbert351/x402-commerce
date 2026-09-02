@@ -1,0 +1,21 @@
+{
+  "name": "xpay-commerce",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "xPay Commerce — pay-per-call MCP commerce on Binance Agent OS (x402 rail). Track A, Payment Workflows.",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "asp": "node --dns-result-order=ipv4first apps/asp/src/server.js",
+    "buy": "node --dns-result-order=ipv4first apps/buyer/src/buy.js",
+    "test": "node --dns-result-order=ipv4first --test apps/*/test/*.test.js packages/*/test/*.test.js",
+    "diagram": "echo \"open architecture.html in a browser\""
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}

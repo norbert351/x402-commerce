@@ -1,0 +1,12 @@
+{
+  "name": "@xpay/core",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node --dns-result-order=ipv4first --test test/*.test.js"
+  },
+  "dependencies": {
+    "viem": "^2.56.3"
+  }
+}
