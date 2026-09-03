@@ -1,0 +1,31 @@
+# xPay Commerce — Binance Agent OS x402 rail (sell-side ASP)
+# Single web service. All env is PUBLIC config (chain/payTo/price) — the seller
+# server needs NO private keys (the buyer signs off-VM), so no sync:false secrets.
+services:
+  - type: web
+    name: xpay-commerce
+    runtime: node
+    rootDir: /
+    buildCommand: npm ci
+    startCommand: node --dns-result-order=ipv4first apps/asp/src/server.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # Binance Agent OS / BNB rail (BSC testnet, settle in $U / United Stables, 18-dec)
+      - key: XPAY_CHAIN_ID
+        value: "97"
+      - key: XPAY_ASSET
+        value: "0xc70B8741B8B07A6d61E54fd4B20f22Fa648E5565"
+      - key: XPAY_DECIMALS
+        value: "18"
+      - key: XPAY_RPC_URL
+        value: "https://bsc-testnet-rpc.publicnode.com"
+      - key: XPAY_PRICE_USDC
+        value: "0.00002"
+      - key: XPAY_TIMEOUT_S
+        value: "300"
+      - key: XPAY_PAY_TO
+        value: "0x73b16058d57a6337060677496d4A8e97A9554539"
+      # demo budget: uncapped by default; set atomic cap to enforce spend-budget
+      # e.g. 2000000000000000000 = 2 $U/day/payer. Leave unset for no cap.

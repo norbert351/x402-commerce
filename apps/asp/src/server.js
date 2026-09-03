@@ -8,7 +8,7 @@ const ledger = createLedger(new URL('../data/ledger.sqlite', import.meta.url).pa
 const BUDGET_ATOMIC = process.env.XPAY_BUDGET_ATOMIC ? Number(process.env.XPAY_BUDGET_ATOMIC) : null;
 const CHAIN_NAME = config.chainId === 97 ? 'BSC' : config.chainId === 84532 ? 'Base' : String(config.chainId);
 
-const PORT = Number(process.env.XPAY_PORT || 3000);
+const PORT = Number(process.env.XPAY_PORT || process.env.PORT || 3000); // Render injects PORT
 const RESOURCE_PREFIX = '/v1/market';
 
 function sendJson(res, status, obj, headers = {}) {
