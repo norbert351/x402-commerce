@@ -1,16 +1,17 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
-import { config, buildChallengeBytes, verifyPayments } from '@xpay/core';
-import { createConsumeRing } from '../../asp/src/ring.js';
+import { config, buildChallengeBytes, verifyPayments, createLedger } from '@xpay/core';
 
 // xPay Commerce — MCP binding.
 // The Binance feed exposed as an x402-priced MCP tool: an agent calls get_market_data,
 // the server answers with a PAYMENT challenge (resource, price, payTo) until the agent
 // settles on-chain and replays with a PAYMENT-SIGNATURE header inside the tool call.
-// Same gate as the REST ASP, same replay ring — the MCP surface IS the commerce.
+// Same gate as the REST ASP, same ledger (replay + budget + audit) — the MCP surface IS the commerce.
 
-const consume = createConsumeRing(new URL('../../asp/data', import.meta.url).pathname);
+const ledger = createLedger(new URL('../../asp/data/ledger.sqlite', import.meta.url).pathname);
+const BUDGET_ATOMIC = process.env.XPAY_BUDGET_ATOMIC ? Number(process.env.XPAY_BUDGET_ATOMIC) : null;
+const CHAIN_NAME = config.chainId === 97 ? 'BSC' : config.chainId === 84532 ? 'Base' : String(config.chainId);
 const server = new McpServer({ name: 'xpay-commerce', version: '0.1.0' });
 
 // Helpers shared with the REST ASP
@@ -40,16 +41,26 @@ server.tool('get_market_data',
       return { content: [{ type: 'text', text: challengeText(resource) }], isError: false };
     }
     try {
-      const { payer, txHash } = await verifyPayments(paymentSignature, { expectedResource: resource, consume });
+      const { payer, txHash } = await verifyPayments(paymentSignature, { expectedResource: resource, consume: bankTxId });
+      const charge = ledger.charge({
+        txHash, payer, resource, amountAtomic: config.amountAtomic,
+        chainId: config.chainId, chainName: CHAIN_NAME, asset: config.asset, budgetAtomic: BUDGET_ATOMIC,
+      });
+      if (!charge.ok && charge.code === 'budget_exceeded') throw { code: 'budget_exceeded', detail: `daily ${charge.dailyAtomic}/${BUDGET_ATOMIC}` };
       const price = await livePrice(symbol);
       return {
-        content: [{ type: 'text', text: JSON.stringify({ status: 'paid', resource, symbol: symbol.toUpperCase(), price: price.price, payer, paidTx: txHash }, null, 2) }],
+        content: [{ type: 'text', text: JSON.stringify({ status: 'paid', resource, symbol: symbol.toUpperCase(), price: price.price, payer, paidTx: txHash, budget: ledger.spendToday(payer) }, null, 2) }],
         isError: false,
       };
     } catch (err) {
       return { content: [{ type: 'text', text: challengeText(resource, err) }], isError: false };
     }
   });
+
+function bankTxId(txHash) {
+  if (ledger.alreadyBanked(txHash)) throw { code: 'payment_already_used', detail: 'tx already consumed' };
+  return true;
+}
 
 server.tool('get_quote',
   { symbol: z.string().describe('Trading pair, e.g. ETHUSDT') },

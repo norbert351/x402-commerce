@@ -81,7 +81,7 @@ XPAY_ENV_FILE=.env.bnb XPAY_PORT=3020 npm run asp    # sell side on chain 97 / $
 XPAY_ENV_FILE=.env.bnb XPAY_BUYER_KEY=<bsc-key> npm run buy "http://localhost:3020/v1/market" BTCUSDT
 ```
 
-The gate and buyer are chain-agnostic: Base-Sepolia (USDC) is the fail-open default; BNB ($U eip3009) is wired and its negative paths are verified against the live BSC testnet. A **positive on-BNB settle→serve is the one path not yet live-exercised** — it needs a BSC-funded key (BNB for gas + $U).
+The gate and buyer are chain-agnostic: Base-Sepolia (USDC) is the fail-open default; BNB ($U eip3009) is wired and **positive settle→serve is now live-verified on BSC testnet** with a real on-chain $U payment + replay protection.
 
 Full loop already verified live on Base Sepolia (real on-chain USDC):
 
@@ -110,13 +110,13 @@ second replay: 402 - {"code":"payment_already_used","detail":"tx already consume
 - [x] Replay protection verified on-chain (negative matrix)
 - [x] Chain-parametrised `.env` (swap Base-Sepolia ⇄ BNB)
 - [x] **MCP Server binding** (stdio; `get_market_data` x402-priced + `get_quote`)
-- [x] **BNB rail wired** (chain 97 / $U; negative paths verified against live BSC testnet)
-- [ ] BNB positive settle→serve (needs BSC-funded key: BNB gas + $U)
-- [ ] Ledger/audit persistence (postgres) + spend-budget enforcement UI
+- [x] **BNB rail wired AND live** (chain 97 / $U; positive settle→serve + replay protection verified on BSC testnet)
+- [x] **Ledger + spend-budget enforcement** (node:sqlite audit trail + /ledger + per-payer daily budget, `XPAY_BUDGET_ATOMIC`; budget_exceeded verified live)
+- [ ] BNB mainnet config flip (needs real $U / p2p rail)
 - [ ] Real Binance Agent OS MCP-Hub / x402 rail (mainnet) wiring
 - [ ] Deploy (Render) + keep-alive for judged demo window
 
 ## Honest limits (verified vs unverified)
 
-- **Verified**: live Base-Sepolia on-chain settlement + replay protection, live Binance market-data feed reachable+served behind the gate; MCP stdio loop (unsigned→challenge, paid→serve) live on-chain; BNB rail challenge shape + negative rejection on live BSC testnet; 11/11 test suite; node v22 / viem 2.56 / @x402 / MCP-SDK compatibility.
-- **Unverified / inferred**: no official Track A judging rubric published (open call); positive on-BNB $U settle→serve not yet live-exercised (no BSC-funded key); real Binance Agent OS MCP-Hub / mainnet rail is a config swap, not yet wired/tested.
+- **Verified**: live Base-Sepolia on-chain settlement + replay protection; live Binance feed served behind the gate; MCP stdio loop live on-chain; **BNB $U positive settle→serve + replay protection live on BSC testnet (chain 97)**; 11/11 test suite; node v22 / viem 2.56 / @x402 / MCP-SDK compatibility.
+- **Unverified / inferred**: no official Track A judging rubric published (open call); BNB **mainnet** not exercised (needs real $U + permit2 rail); real Binance Agent OS MCP-Hub / mainnet rail is a config swap, not yet wired/tested.
