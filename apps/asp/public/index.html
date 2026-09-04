@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0a0a" />
+  <title>xPay Commerce — Pay-per-call market data on Binance Agent OS</title>
+  <meta name="description" content="AI agents pay micro-payments on-chain via x402 to unlock live Binance market data. A pay-per-call commerce demo on Binance Agent OS." />
+  <link rel="stylesheet" href="styles.css?v=3" />
+</head>
+<body>
+  <div class="app-shell">
+
+    <!-- Sidebar (desktop) -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">⚡</div>
+        <div class="brand-text">
+          <div class="brand-name">xPay Commerce</div>
+          <div class="brand-sub">Binance Agent OS · x402</div>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="#/" class="nav-item" data-route="/">
+          <span class="nav-ico">◎</span><span class="nav-label">Dashboard</span>
+        </a>
+        <a href="#/market" class="nav-item" data-route="/market">
+          <span class="nav-ico">◈</span><span class="nav-label">Market</span>
+        </a>
+        <a href="#/ledger" class="nav-item" data-route="/ledger">
+          <span class="nav-ico">≡</span><span class="nav-label">Ledger</span>
+        </a>
+        <a href="#/mcp" class="nav-item" data-route="/mcp">
+          <span class="nav-ico">◉</span><span class="nav-label">MCP for agents</span>
+        </a>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="conn-dot" id="conn-dot-side"></div>
+        <span id="conn-text-side">connecting…</span>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="main">
+      <header class="topbar">
+        <a href="#/" class="topbar-brand">⚡ xPay<span>Commerce</span></a>
+        <div class="topbar-status">
+          <span class="live-pill"><span class="live-dot"></span> live</span>
+          <span class="base-chip" id="base-chip" title="API base">…</span>
+        </div>
+      </header>
+
+      <div class="global-banner hidden" id="global-banner">
+        <span class="gb-ico">⚠</span><span id="global-banner-text"></span>
+        <button class="gb-close" id="global-banner-close" aria-label="dismiss">×</button>
+      </div>
+
+      <main class="content" id="view-root"></main>
+
+      <!-- Mobile bottom nav -->
+      <nav class="bottom-nav">
+        <a href="#/" class="bn-item" data-route="/"><span class="bn-ico">◎</span><span>Home</span></a>
+        <a href="#/market" class="bn-item" data-route="/market"><span class="bn-ico">◈</span><span>Market</span></a>
+        <a href="#/ledger" class="bn-item" data-route="/ledger"><span class="bn-ico">≡</span><span>Ledger</span></a>
+        <a href="#/mcp" class="bn-item" data-route="/mcp"><span class="bn-ico">◉</span><span>MCP</span></a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toast-wrap"></div>
+
+  <script src="app.js?v=3" defer></script>
+</body>
+</html>

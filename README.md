@@ -109,14 +109,26 @@ second replay: 402 - {"code":"payment_already_used","detail":"tx already consume
 - [x] Buy-side agent client (probe → settle → sign → replay)
 - [x] Replay protection verified on-chain (negative matrix)
 - [x] Chain-parametrised `.env` (swap Base-Sepolia ⇄ BNB)
-- [x] **MCP Server binding** (stdio; `get_market_data` x402-priced + `get_quote`)
+- [x] **MCP Server binding** (stdio; `get_market_data` x402-priced + `get_quote` + `get_klines`)
 - [x] **BNB rail wired AND live** (chain 97 / $U; positive settle→serve + replay protection verified on BSC testnet)
 - [x] **Ledger + spend-budget enforcement** (node:sqlite audit trail + /ledger + per-payer daily budget, `XPAY_BUDGET_ATOMIC`; budget_exceeded verified live)
+- [x] **Richer paid feed** — `/v1/market/:sym`, `/v1/market/:sym/ticker` (24h), `/v1/market/:sym/klines` (candles, interval/limit); same gate, per-resource replay
+- [x] **Free live preview** — `/v1/preview/:sym` (2s-fresh price + 24h, no payment) for the dashboard
+- [x] **Web dashboard** — static SPA served at `/` (system status, free preview strip, request studio with a live paywall-demo 402, ledger + spend budget, MCP wiring page)
+- [x] **HTTP/SSE MCP** — same paid tools also mounted on the ASP at `/mcp` (remote agents; shared `packages/core/mcp-tools.js`)
+- [x] **Post-deploy smoke check** — `npm run smoke [url]` (health, preview, paywall, richer rails, ledger, MCP SSE, UI)
 - [ ] BNB mainnet config flip (needs real $U / p2p rail)
 - [ ] Real Binance Agent OS MCP-Hub / x402 rail (mainnet) wiring
 - [ ] Deploy (Render) + keep-alive for judged demo window
 
+## Verify after deploy
+
+```bash
+npm run smoke https://xpay-commerce.onrender.com
+# expect: 10 passed, 0 failed
+```
+
 ## Honest limits (verified vs unverified)
 
-- **Verified**: live Base-Sepolia on-chain settlement + replay protection; live Binance feed served behind the gate; MCP stdio loop live on-chain; **BNB $U positive settle→serve + replay protection live on BSC testnet (chain 97)**; 11/11 test suite; node v22 / viem 2.56 / @x402 / MCP-SDK compatibility.
-- **Unverified / inferred**: no official Track A judging rubric published (open call); BNB **mainnet** not exercised (needs real $U + permit2 rail); real Binance Agent OS MCP-Hub / mainnet rail is a config swap, not yet wired/tested.
+- **Verified**: live Base-Sepolia on-chain settlement + replay protection; live Binance feed served behind the gate; MCP stdio loop live on-chain; **BNB $U positive settle→serve + replay protection live on BSC testnet (chain 97)**; **22/22 test suite**; HTTP/SSE MCP handshake; web dashboard + richer feed rails; node v22 / viem 2.56 / @x402 / MCP-SDK compatibility.
+- **Unverified / inferred**: no official Track A judging rubric published (open call); BNB **mainnet** not exercised (needs real $U + permit2 rail); real Binance Agent OS MCP-Hub / mainnet rail is a config swap, not yet wired/tested; the in-browser "paywall demo" 402 button shows the challenge but settlement still happens via the buyer CLI (no wallet keys in the UI by design).

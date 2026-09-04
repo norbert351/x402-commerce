@@ -3,6 +3,13 @@
   "version": "0.1.0",
   "type": "module",
   "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./mcp-tools.js": "./src/mcp-tools.js",
+    "./mcp-tools": "./src/mcp-tools.js",
+    "./binance.js": "./src/binance.js",
+    "./binance": "./src/binance.js"
+  },
   "scripts": {
     "test": "node --dns-result-order=ipv4first --test test/*.test.js"
   },

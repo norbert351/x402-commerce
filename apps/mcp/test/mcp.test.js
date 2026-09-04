@@ -46,6 +46,7 @@ test('MCP server lists get_market_data tool over stdio', async () => {
     const names = res.result.tools.map((t) => t.name);
     assert.ok(names.includes('get_market_data'));
     assert.ok(names.includes('get_quote'));
+    assert.ok(names.includes('get_klines'));
     assert.equal(res.id, 2);
   } finally { mcp.child.kill(); }
 });

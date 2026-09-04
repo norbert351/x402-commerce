@@ -12,6 +12,7 @@
     "asp": "node --dns-result-order=ipv4first apps/asp/src/server.js",
     "buy": "node --dns-result-order=ipv4first apps/buyer/src/buy.js",
     "test": "node --dns-result-order=ipv4first --test apps/*/test/*.test.js packages/*/test/*.test.js",
+    "smoke": "node --dns-result-order=ipv4first scripts/smoke.mjs",
     "diagram": "echo \"open architecture.html in a browser\""
   },
   "engines": {
