@@ -5,4 +5,4 @@ node_modules/
 *.log
 demo/.demo-buyer-key
 .demo-buyer-key
-*.local
+*.localtimeline.json
