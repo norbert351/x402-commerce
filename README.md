@@ -1,6 +1,9 @@
 # xPay Commerce
 
-**Pay-per-call MCP commerce on Binance Agent OS** — the Payment Workflows lane of the Binance Agent OS Mini Hackathon (Track A).
+[![live](https://img.shields.io/badge/live-onrender-0FACB0)](https://xpay-commerce.onrender.com)
+[![Track A — Payment Workflows](https://img.shields.io/badge/Binance%20Agent%20OS-Track_A_%E2%80%94_Payment_F4BA2E)](#)
+
+**Pay-per-call MCP commerce on Binance Agent OS** — the Payment Workflows lane of the Binance Agent OS Mini Hackathon (Track A, judged · video + GitHub submission · deadline Sep 8 23:59 UTC). **Live:** [https://xpay-commerce.onrender.com](https://xpay-commerce.onrender.com) (BSC testnet / `$U`).
 
 The thesis: **agents paying agents in micro-payments, not subscriptions or shared API keys.** Turn any Binance data/analysis/signal feed into an x402-priced endpoint so an AI agent pays a few cents *per request* on-chain and gets the data. Removal of x402 ⟹ the paywall disappears ⟹ the product stops being pay-per-call. x402 is load-bearing.
 
@@ -117,9 +120,24 @@ second replay: 402 - {"code":"payment_already_used","detail":"tx already consume
 - [x] **Web dashboard** — static SPA served at `/` (system status, free preview strip, request studio with a live paywall-demo 402, ledger + spend budget, MCP wiring page)
 - [x] **HTTP/SSE MCP** — same paid tools also mounted on the ASP at `/mcp` (remote agents; shared `packages/core/mcp-tools.js`)
 - [x] **Post-deploy smoke check** — `npm run smoke [url]` (health, preview, paywall, richer rails, ledger, MCP SSE, UI)
+- [x] **Deployed on Render (live)** — `https://xpay-commerce.onrender.com` (BSC testnet / `$U`), keep-alive cron armed for the judged demo window
 - [ ] BNB mainnet config flip (needs real $U / p2p rail)
 - [ ] Real Binance Agent OS MCP-Hub / x402 rail (mainnet) wiring
-- [ ] Deploy (Render) + keep-alive for judged demo window
+
+## Live demo
+
+- **URL:** [https://xpay-commerce.onrender.com](https://xpay-commerce.onrender.com) — landing → live market feed → Market / Ledger / MCP.
+- **Verify it live:** `npm run smoke https://xpay-commerce.onrender.com` → **10 passed, 0 failed**
+  (health · live BTC/ETH/SOL preview · 402 paywall ×3 · ledger · budget · MCP SSE · UI).
+- **Docs:** [ARCHITECTURE.md](ARCHITECTURE.md) · [docs/TECHNICAL.md](docs/TECHNICAL.md) · [docs/ROADMAP.md](docs/ROADMAP.md).
+
+## Who it's for
+
+Developers/agents who want to **sell any Binance data, analysis, or signal feed as a
+pay-per-call x402 endpoint** — agent asks → auto-settles micro-`$U` on-chain → gets the
+data, no API keys or subscriptions. **It's not for** bulk/subscription merchandisers:
+x402 is deliberately per-call. Removal of the x402 gate = the paywall disappears = it is
+no longer pay-per-call — so the protocol **is** the product.
 
 ## Verify after deploy
 
@@ -130,5 +148,5 @@ npm run smoke https://xpay-commerce.onrender.com
 
 ## Honest limits (verified vs unverified)
 
-- **Verified**: live Base-Sepolia on-chain settlement + replay protection; live Binance feed served behind the gate; MCP stdio loop live on-chain; **BNB $U positive settle→serve + replay protection live on BSC testnet (chain 97)**; **22/22 test suite**; HTTP/SSE MCP handshake; web dashboard + richer feed rails; node v22 / viem 2.56 / @x402 / MCP-SDK compatibility.
+- **Verified**: live Base-Sepolia on-chain settlement + replay protection; live Binance feed served behind the gate; MCP stdio loop live on-chain; **BNB $U positive settle→serve + replay protection live on BSC testnet (chain 97)**; **22/22 test suite**; HTTP/SSE MCP handshake; web dashboard + richer feed rails; node v22 / viem 2.56 (**x402 v2 implemented natively on viem — no `@x402` SDK wrapper**) / `@modelcontextprotocol/sdk` v1.30.
 - **Unverified / inferred**: no official Track A judging rubric published (open call); BNB **mainnet** not exercised (needs real $U + permit2 rail); real Binance Agent OS MCP-Hub / mainnet rail is a config swap, not yet wired/tested; the in-browser "paywall demo" 402 button shows the challenge but settlement still happens via the buyer CLI (no wallet keys in the UI by design).
