@@ -4,37 +4,37 @@ _Source of truth for the UI. Built fresh per the Composition Variation System �
 
 ## 1. Identity (one sentence)
 
-> **"Ink terminal-economy for agents"** — a deep graphite developer console where a warm amber marks real money changing hands. Technical but alive, editorial but unmistakably a payments rail.
+> **"Clean ink-terminal for agents"** — a tidy, flat dark developer page where a single warm amber marks real money changing hands. Minimal chrome, a real-time market panel as the hero, no AI-generic gradients or grit.
 
-- **Who it's for:** developers, AI agents, hackathon judges who must *feel* the x402 protocol is load-bearing in one glance.
+- **Who it is for:** developers, AI agents, hackathon judges who must *feel* the x402 protocol is load-bearing in one glance.
 - **Tone of copy:** plain, first-time-friendly, confident, zero hype. Conversational instructions + precise onchain readouts.
-- **Memorable trait:** the amber "money-in-motion" accent + a serialized 3-step payment-rail visual on the landing.
+- **Memorable trait:** the amber money accent + a **live market-data panel** (real prices + sparklines over the free preview rail) as the hero image, matching what the product actually is.
 
 ## 2. Palette
 
 | Token | Hex | Use |
 |---|---|---|
-| `--bg` | `#0A0D12` | app background (blue-tinted ink, not pure black) |
-| `--bg-2` | `#0E131B` | sidebar, raised wells |
-| `--card` | `#11161F` | cards |
-| `--card-2` | `#151C27` | hover / inset |
-| `--border` | `#1E2633` | hairline strokes |
-| `--border-2` | `#2A3342` | strong borders |
-| `--text` | `#EDE9E2` | warm off-white headings |
-| `--body` | `#C7CDD8` | body text |
-| `--muted` | `#8A93A5` | secondary |
-| `--accent` | `#FFB020` | **amber** — price, money, CTAs |
-| `--accent-2` | `#FFCE6B` | amber highlight / gradient |
-| `--accent-dim` | `#3A2E15` | amber tint tiles |
-| `--green` | `#34D399` | online / positive change |
-| `--danger` | `#F87171` | errors / 402 blocks |
-| `--warn` | `#F59E0B` | caution |
+| `--bg` | `#0B0E14` | flat, clean ink background |
+| `--bg-2` | `#10141C` | sidebar, raised wells |
+| `--card` | `#141925` | cards (flat, no banding) |
+| `--card-2` | `#171D2A` | hover / inset |
+| `--border` | `#1F2634` | hairline strokes |
+| `--border-2` | `#2B3446` | strong borders |
+| `--text` | `#F2F4F8` | warm off-white headings |
+| `--body` | `#C6CEDB` | body text |
+| `--muted` | `#93A0B5` | secondary |
+| `--accent` | `#F0B23C` | **amber** — price, money, CTAs |
+| `--accent-2` | `#FFD27A` | amber highlight / gradient |
+| `--accent-dim` | `#3A2F16` | amber tint tiles |
+| `--green` | `#3ECF8E` | online / positive change |
+| `--danger` | `#F97066` | errors / 402 blocks |
+| `--warn` | `#F5A623` | caution |
 
-Contrast: all body/muted temps pass AA on `--bg`/`--card`. Amber on ink = strong primary contrast. **No purple, no teal, no neon blur.**
+Contrast: all body/muted temps pass AA on `--bg`/`--card`. Amber on ink = strong primary contrast. **No purple, no teal, no neon blur, no heavy radial glows or grid grit.**
 
 ## 3. Typography
 
-- **Display (H1/H2/eyebrow):** **Clash Display** 500–700 (Fontshare) — geometric, technical, premium.
+- **Display (H1/H2/eyebrow):** **Switzer** 500–700 (Fontshare) — clean, geometric, softer terminals than Clash Display.
 - **Body/UI:** **General Sans** 400–600 (Fontshare).
 - **Mono (all onchain readouts, prices, hashes, code):** **JetBrains Mono** (Google Fonts).
 - Loaded via CDN `<link>` (plain static SPA — no build step).
@@ -45,13 +45,15 @@ Contrast: all body/muted temps pass AA on `--bg`/`--card`. Amber on ink = strong
 - Base: 4px scale; section gaps 16–32px; content max-width **1120px**.
 - Motion: `cubic-bezier(0.16,1,0.3,1)`; subtle rise-in on load (stagger), amber pulse on live dots, hover lift on cards. Content visible by default (no scroll-hide for new users).
 
-## 5. Hero architecture (landing = Dashboard root)
+## 5. Hero architecture (landing = standalone page, NO app chrome)
 
-Centered brand statement — **no text-block-on-the-right**:
+The homepage is a **marketing landing with its own header** — the sidebar/topbar/bottom-nav app chrome is hidden (`body.on-landing`). Centered brand statement — **no text-block-on-the-right**:
 
+- Own slim header: brand left, text nav (Market/Ledger/MCP) center, primary CTA right.
 - eyebrow pill (protocol creds) → centered H1 (amber keyword) → subhead → CTA row (primary "Unlock live data →" to Market, secondary "Open the ledger"):
-- **Showcase visual below the headline:** a serialized 3-step payment rail (Probe → 402 challenge → Settle & serve) drawn as connected nodes with an amber payment token animating head-right; floating live stat chips (price/call, chain·asset, paid calls) around it.
-- Below the fold: System status stats, free market preview strip, then two explainer cards + developer entry. Landing funnels to Market/Ledger via the CTAs; live data panels stay on their own product pages.
+- **Live market panel** = the real-time hero image: three ticker rows (price + 24h change + live SVG sparkline) fed by the free `/v1/preview` rail, refreshing every 5s. This matches what the product sells (market data).
+- **System chips row** under the panel (price/call, chain·asset, paid calls, budget) wired to `/health`.
+- Below the fold: "How the pay-per-call rail works" (3 steps) → "Built for agents, audited like a ledger" (trust bullets) → CTA band → footer. Product data panels live on the product routes.
 
 ## 6. Component notes (all reused view classes restyled)
 

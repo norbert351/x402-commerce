@@ -204,6 +204,7 @@
   function navigate() {
     var route = currentRoute();
     var fns = routes[route] || routes["/"];
+    document.body.classList.toggle("on-landing", route === "/");
     document.querySelectorAll(".nav-item, .bn-item").forEach(function (a) {
       a.classList.toggle("active", a.getAttribute("data-route") === route);
     });
@@ -241,6 +242,7 @@
      DASHBOARD
      ========================================================= */
   var pairHistory = {}; // symbol -> array of {t, price}
+  var pairChg = {};     // symbol -> 24h change percent (from preview)
   var dashHealthTimer = null;
   var dashPreviewTimer = null;
 
@@ -248,90 +250,139 @@
     var root = viewRoot;
     root.innerHTML = "";
 
-    // hero
-    var hero = el("div", "hero");
-    hero.appendChild(el("div", "hero-eyebrow", '<span class="d"></span>&nbsp;x402 · Open Payments v2'));
-    hero.appendChild(el("h2", "", 'Agents pay per call.<br><span class="grad">No subscriptions. No API keys.</span>'));
-    hero.appendChild(el("p", "", "An AI agent settles an on-chain <b>micro-payment</b> through the <b>Open Payments x402</b> protocol to unlock live Binance market data — every call changes the ledger. One transfer, one request, billed atomically."));
-    var cta = el("div", "hero-cta");
-    cta.innerHTML =
-      '<a class="btn btn-primary" href="#/market">Unlock live data <span class="arrow">→</span></a>' +
-      '<a class="btn btn-ghost" href="#/ledger">Open the ledger</a>';
-    hero.appendChild(cta);
-    var heroTrust = el("div", "hero-trust");
-    heroTrust.innerHTML =
-      '<span class="pill teal">x402 · Payment Required</span>' +
-      '<span class="pill green">pay-per-call</span>' +
-      '<span class="pill muted">Binance Agent OS</span>';
-    hero.appendChild(heroTrust);
+    /* ---- landing header (own nav on the homepage) ---- */
+    var head = el("header", "land-header");
+    head.innerHTML =
+      '<a class="land-brand" href="#/">' +
+        '<span class="land-mark"><svg viewBox="0 0 24 24" width="17" height="17" fill="none"><path d="M13 3 5 13h6l-1 8 9-11h-6l0-7z" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/></svg></span>' +
+        '<span class="land-name">xPay<span>Commerce</span></span>' +
+      '</a>' +
+      '<nav class="land-nav"><a href="#/market">Market</a><a href="#/ledger">Ledger</a><a href="#/mcp">MCP</a></nav>' +
+      '<a class="btn btn-primary land-cta" href="#/market">Unlock live data <span class="arrow">→</span></a>';
+    root.appendChild(head);
+
+    /* ---- hero ---- */
+    var hero = el("section", "hero");
+    hero.innerHTML =
+      '<span class="hero-eyebrow"><span class="d"></span>&nbsp;x402 · Open Payments v2</span>' +
+      '<h1>Agents pay per call.<br><span class="grad">No subscriptions. No API keys.</span></h1>' +
+      '<p class="hero-sub">An AI agent settles an on-chain <b>micro-payment</b> through the <b>Open Payments x402</b> protocol to unlock live Binance market data — every call changes the ledger. One transfer, one request, billed atomically.</p>' +
+      '<div class="hero-cta">' +
+        '<a class="btn btn-primary btn-lg" href="#/market">Unlock live data <span class="arrow">→</span></a>' +
+        '<a class="btn btn-ghost btn-lg" href="#/ledger">Open the ledger</a>' +
+      '</div>' +
+      '<div class="hero-trust">' +
+        '<span class="pill teal">x402 · Payment Required</span>' +
+        '<span class="pill green">pay-per-call</span>' +
+        '<span class="pill muted">Binance Agent OS</span>' +
+      '</div>';
     root.appendChild(hero);
 
-    // x402 payment rail showcase
-    var show = el("div", "showcase");
-    show.innerHTML =
-      '<div class="showcase-annotate"><span>payment rail · sell-side ASP</span><b>HTTP 402 → settle → serve</b></div>' +
-      '<div class="rail">' +
-        '<div class="rail-step"><div class="rs-num">01 · probe</div><div class="rs-title">Agent calls the feed</div>' +
-        '<div class="rs-desc">A buyer agent requests a market resource with no proof of payment yet.</div>' +
-        '<div class="rs-monos"><span class="pill muted">GET /v1/market/BTCUSDT</span></div></div>' +
-        '<div class="rail-link"><span class="rail-sep"></span><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></div>' +
-        '<div class="rail-step"><div class="rs-num">02 · challenge</div><div class="rs-title">Paywall answers 402</div>' +
-        '<div class="rs-desc">The server returns <b>HTTP 402</b> plus an x402 challenge encoding resource, payee and amount.</div>' +
-        '<div class="rs-monos"><span class="pill teal">402 · PAYMENT-REQUIRED</span></div></div>' +
-        '<div class="rail-link"><span class="rail-sep"></span><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></div>' +
-        '<div class="rail-step settle"><div class="rs-num">03 · settle &amp; serve</div><div class="rs-title">One transfer = one request</div>' +
-        '<div class="rs-desc">The agent settles on-chain, signs the EIP-712 payment, replays with a <span style="font-family:var(--mono);color:var(--accent-2)">PAYMENT-SIGNATURE</span> header — and receives the billed payload.</div>' +
-        '<div class="rs-monos"><span class="pill green">200 · live feed</span><span class="pill muted">replay-protected</span></div></div>' +
+    /* ---- LIVE market panel: the real-time image that matches the product ---- */
+    var live = el("section", "live-panel");
+    live.innerHTML =
+      '<div class="panel-head">' +
+        '<span class="ph-l"><span class="live-dot"></span> Live market feed</span>' +
+        '<span class="ph-r">free preview · refreshes every 5s</span>' +
       '</div>' +
-      '<div class="chip-wrap">' +
-        '<div class="float-chip"><span class="fc-l">price / call</span><span class="fc-v" id="chip-price">…</span></div>' +
-        '<div class="float-chip"><span class="fc-l">chain · asset</span><span class="fc-v plain" id="chip-chain">…</span></div>' +
-        '<div class="float-chip"><span class="fc-l">paid calls</span><span class="fc-v" id="chip-paid">0</span></div>' +
+      '<div class="live-grid">' +
+        SYMBOLS.map(function (s) {
+          return '<div class="tk" id="row-' + s + '"><div class="tk-skel"></div></div>';
+        }).join("") +
       '</div>';
-    root.appendChild(show);
+    root.appendChild(live);
 
-    // system status
-    var statusCard = el("div", "card mt16");
-    statusCard.appendChild(cardHead("Live system status", "GET /health · auto-refreshes"));
-    var healthBox = el("div", "stats");
-    var sk1 = "";
-    for (var i = 0; i < 4; i++) sk1 += '<div class="card"><div class="skeleton sk-line" style="width:60%"></div><div class="skeleton" style="height:22px;width:40%"></div></div>';
-    healthBox.innerHTML = sk1;
-    statusCard.appendChild(healthBox);
-    // payee (x402 payTo) — wrapped + copyable, populated after /health resolves
-    var paytoWrap = el("div", "mt16");
-    paytoWrap.innerHTML = '<div class="small muted mb" style="letter-spacing:.5px">PAYEE · x402 settle-to</div>' +
-      '<div class="copy-row" id="payto-card"><span class="cr-val">—</span><button class="copy-btn" data-clip="" title="copy">⧉</button></div>';
-    statusCard.appendChild(paytoWrap);
-    root.appendChild(statusCard);
+    /* ---- system chips (from /health) ---- */
+    var chips = el("div", "chips");
+    chips.innerHTML =
+      '<div class="chip"><span class="c-l">price / call</span><span class="c-v" id="chip-price">…</span></div>' +
+      '<div class="chip"><span class="c-l">chain · asset</span><span class="c-v" id="chip-chain">…</span></div>' +
+      '<div class="chip"><span class="c-l">paid calls</span><span class="c-v" id="chip-paid">0</span></div>' +
+      '<div class="chip"><span class="c-l">budget</span><span class="c-v" id="chip-budget">…</span></div>';
+    root.appendChild(chips);
 
-    // free preview strip
-    var stripCard = el("div", "card mt16");
-    stripCard.appendChild(cardHead("Free market preview", "live teaser — no payment · ~5s fresh"));
-    var strip = el("div", "pair-strip");
-    var pins = "";
-    for (var s = 0; s < SYMBOLS.length; s++) {
-      pins += '<div class="pair-card" id="pair-' + SYMBOLS[s] + '">' +
-        '<div class="skeleton sk-line" style="width:50%"></div><div class="skeleton" style="height:22px;width:36%"></div></div>';
-    }
-    strip.innerHTML = pins;
-    stripCard.appendChild(strip);
-    root.appendChild(stripCard);
+    /* ---- how it works ---- */
+    var how = el("section", "how");
+    how.innerHTML =
+      '<h2 class="sec-h">How the pay-per-call rail works</h2>' +
+      '<p class="sec-sub">No subscriptions, no shared API keys — just a per-request on-chain micro-payment.</p>' +
+      '<div class="step-grid">' +
+        '<div class="step"><div class="st-num">01</div><div class="st-title">Agent calls the feed</div><div class="st-desc">A buyer agent requests live market data with no proof of payment yet.</div></div>' +
+        '<div class="step"><div class="st-num">02</div><div class="st-title">Paywall answers 402</div><div class="st-desc">The server returns <b>HTTP 402</b> with an x402 challenge encoding resource, payee and amount.</div></div>' +
+        '<div class="step"><div class="st-num">03</div><div class="st-title">One transfer = one request</div><div class="st-desc">The agent settles on-chain, signs the EIP-712 payment and replays with a <span class="st-sig">PAYMENT-SIGNATURE</span> header to unlock the billed payload.</div></div>' +
+      '</div>';
+    root.appendChild(how);
 
-    // explainer grid
-    var grid = el("div", "grid grid-2 mt16");
-    grid.appendChild(freeVsPaidCard());
-    grid.appendChild(loadBearingCard());
-    root.appendChild(grid);
+    /* ---- protocol / trust ---- */
+    var trust = el("section", "trust-band");
+    trust.innerHTML =
+      '<div class="tb-l"><h2 class="sec-h">Built for agents,<br>audited like a ledger</h2></div>' +
+      '<div class="tb-r"><ul class="chk">' +
+        '<li>Every call leaves an <b>immutable on-chain ledger entry</b> — tx hash, payer, resource, amount.</li>' +
+        '<li><b>Replay protection</b>: a paid transaction can only be consumed once. No double-spend rows.</li>' +
+        '<li><b>Per-payer daily budget</b> caps exposure at a spend limit you set — never an unlimited draw.</li>' +
+      '</ul></div>';
+    root.appendChild(trust);
 
-    // kick off data
-    var hashed_api_probe = refreshMeta().then(function (h) { renderHealth(healthBox, h); });
+    /* ---- CTA band ---- */
+    var band = el("section", "cta-band");
+    band.innerHTML =
+      '<h2>Try the live rail</h2>' +
+      '<p>Kick the paywall, hit the demo 402, or wire the buyer CLI and settle a real on-chain micro-payment.</p>' +
+      '<div class="hero-cta">' +
+        '<a class="btn btn-primary btn-lg" href="#/market">Into the product <span class="arrow">→</span></a>' +
+        '<a class="btn btn-ghost btn-lg" href="#/mcp">MCP tools for agents</a>' +
+      '</div>';
+    root.appendChild(band);
+
+    /* ---- footer ---- */
+    var foot = el("footer", "land-foot");
+    foot.innerHTML = "xPay Commerce · Binance Agent OS · Open Payments x402";
+    root.appendChild(foot);
+
+    /* kick off live data */
+    refreshMeta().then(function (h) { renderHealth(document.createElement("div"), h); });
     loadPreviews();
-    startPreviewPoll();
+    renderLandingTickers();
+    setTimeout(renderLandingTickers, 1500); // draw a line after the first previews land
     if (dashPreviewTimer === null) {
-      dashPreviewTimer = setInterval(loadPreviews, PREVIEW_POLL_MS);
+      dashPreviewTimer = setInterval(pollLanding, PREVIEW_POLL_MS);
     }
-    // sample chart history only in market view; reuse pairHistory feed
+  }
+
+  /* refetch previews, then re-render the landing tickers once data lands */
+  function pollLanding() {
+    loadPreviews().then(function () { renderLandingTickers(); });
+  }
+
+  /* live landing tickers: real price + 24h change + sparkline per symbol */
+  function renderLandingTickers() {
+    SYMBOLS.forEach(function (sym) {
+      var row = document.getElementById("row-" + sym);
+      if (!row) return;
+      var arr = (pairHistory[sym] || []).map(function (p) { return Number(p.price); });
+      if (!arr.length) return;
+      var last = arr[arr.length - 1];
+      var chg = pairChg[sym];
+      var chgN = chg != null ? Number(chg) : 0;
+      var cls = chgN >= 0 ? "up" : "down";
+      var pk = cls === "up" ? "spk-up" : "spk-down";
+      var W = 132, H = 38, pad = 4;
+      var mn = Math.min.apply(null, arr), mx = Math.max.apply(null, arr), rng = (mx - mn) || 1;
+      function x(i) { return pad + i * ((W - pad * 2) / (arr.length - 1)); }
+      function y(v) { return pad + (H - pad * 2) * (1 - (v - mn) / rng); }
+      var pts = arr.map(function (v, i) { return x(i).toFixed(1) + "," + y(v).toFixed(1); }).join(" ");
+      var area = pad + "," + (H - pad) + " " + pts + " " + (W - pad).toFixed(1) + "," + (H - pad);
+      var svg = '<svg class="' + pk + '" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">' +
+        '<polygon points="' + area + '" opacity="0.14"/>' +
+        '<polyline points="' + pts + '" fill="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>' +
+        '</svg>';
+      row.innerHTML =
+        '<div class="tk-sym">' + esc(sym) + '</div>' +
+        '<div class="tk-price">' + fmtNum(last) + '</div>' +
+        '<div class="tk-chg ' + cls + '">' + pctArrow(chg) + (chg != null ? " " + Number(chg).toFixed(2) : " —") + "%</div>" +
+        '<div class="tk-spark">' + svg + '</div>';
+    });
   }
 
   function cardHead(title, hint) {
@@ -367,6 +418,7 @@
     setChip("chip-price", fmtUsd(h.priceUsdc) + " / call");
     setChip("chip-chain", chainLabel());
     setChip("chip-paid", paid);
+    setChip("chip-budget", budgetHuman(h.budgetAtomic));
     // pay-to copy row (wrapped + copyable)
     var pt = document.getElementById("payto-card");
     if (h.payTo && pt) {
@@ -409,33 +461,37 @@
   }
 
   function renderPair(sym, data) {
-    var box = document.getElementById("pair-" + sym);
-    if (!box || !data) return;
+    if (!data) return;
     var t = data.ticker || {};
     var last = t.lastPrice != null ? t.lastPrice : data.price;
     var chg = t.priceChangePercent;
     var cls = pctClass(chg);
+    pairChg[sym] = chg;
+    // ALWAYS feed history (even when no #pair-SYM box exists, e.g. on the landing)
+    if (last != null) {
+      if (!pairHistory[sym]) pairHistory[sym] = [];
+      var arr = pairHistory[sym];
+      var now = Date.now();
+      if (!arr.length || Math.abs(now - (arr[arr.length - 1].t)) > 3000) {
+        arr.push({ t: now, price: last });
+        if (arr.length > 90) arr.shift();
+      }
+    }
+    var box = document.getElementById("pair-" + sym);
+    if (!box) return;
     box.innerHTML =
       '<div class="pair-top"><span class="pair-sym">' + esc(sym) + '</span>' +
       '<span class="pair-chg ' + cls + '">' + pctArrow(chg) + ' ' + (chg != null ? Number(chg).toFixed(2) : "—") + '%</span></div>' +
       '<div class="pair-price">' + fmtNum(last) + '</div>' +
       '<div class="pair-meta"><span>H ' + fmtNum(t.highPrice) + '</span><span>L ' + fmtNum(t.lowPrice) + '</span></div>';
-    // feed chart history for market view
-    if (!pairHistory[sym]) pairHistory[sym] = [];
-    var arr = pairHistory[sym];
-    var now = Date.now();
-    if (!arr.length || Math.abs(now - (arr[arr.length - 1].t)) > 3000) {
-      arr.push({ t: now, price: last });
-      if (arr.length > 60) arr.shift();
-    }
   }
 
   function loadPreviews() {
-    SYMBOLS.forEach(function (sym) {
-      api("/v1/preview/" + sym).then(function (r) {
+    return Promise.all(SYMBOLS.map(function (sym) {
+      return api("/v1/preview/" + sym).then(function (r) {
         if (r.ok && r.json) renderPair(sym, r.json);
       }).catch(function () { /* leave existing or skeleton */ });
-    });
+    }));
   }
 
   function startPreviewPoll() {
