@@ -1,0 +1,54 @@
+[
+  {
+    "phase": "landing",
+    "t": 13.58
+  },
+  {
+    "phase": "live_market",
+    "t": 15.62
+  },
+  {
+    "phase": "market_studio",
+    "t": 16.39
+  },
+  {
+    "phase": "market_inputs",
+    "t": 19.44
+  },
+  {
+    "phase": "paywall_unlock",
+    "t": 22.91
+  },
+  {
+    "phase": "paywall_demo",
+    "t": 25.87
+  },
+  {
+    "phase": "payment_fired",
+    "t": 28.81
+  },
+  {
+    "phase": "payment_tx_9ae8a12f",
+    "t": 40.07
+  },
+  {
+    "phase": "ledger_live",
+    "t": 46.78
+  },
+  {
+    "phase": "ledger_overview",
+    "t": 49.78
+  },
+  {
+    "phase": "mcp_tools",
+    "t": 51.52
+  },
+  {
+    "phase": "mcp_config",
+    "t": 53.39
+  },
+  {
+    "phase": "closure",
+    "t": 56.53
+  }
+]
