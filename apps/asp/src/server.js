@@ -17,7 +17,7 @@ const PORT = Number(process.env.XPAY_PORT || process.env.PORT || 3000); // Rende
 
 // ---- static UI (dashboard) ----
 const PUBLIC_DIR = join(here, '../public');
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.json': 'application/json' };
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.mp4': 'video/mp4', '.json': 'application/json' };
 function servePublic(req, res, pathname) {
   let rel = pathname === '/' ? 'index.html' : pathname.replace(/^\/+/, '');
   // prevent path traversal
