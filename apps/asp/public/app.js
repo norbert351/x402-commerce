@@ -254,7 +254,7 @@
     var head = el("header", "land-header");
     head.innerHTML =
       '<a class="land-brand" href="#/">' +
-        '<span class="land-mark"><svg viewBox="0 0 24 24" width="17" height="17" fill="none"><path d="M13 3 5 13h6l-1 8 9-11h-6l0-7z" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/></svg></span>' +
+        '<span class="land-mark"><img class="mark-img" src="logo.png" alt="" width="30" height="30" /></span>' +
         '<span class="land-name">xPay<span>Commerce</span></span>' +
       '</a>' +
       '<nav class="land-nav"><a href="#/market">Market</a><a href="#/ledger">Ledger</a><a href="#/mcp">MCP</a></nav>' +
