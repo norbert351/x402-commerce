@@ -127,7 +127,7 @@ second replay: 402 - {"code":"payment_already_used","detail":"tx already consume
 ## Live demo
 
 - **URL:** [https://xpay-commerce.onrender.com](https://xpay-commerce.onrender.com) — landing → live market feed → Market / Ledger / MCP.
-- **Demo video:** [`docs/demo/xpay-commerce-demo.mp4`](docs/demo/xpay-commerce-demo.mp4) — real live screen recording (37s, 720p) of the deployed product: live market feed → request studio → **HTTP 402 x402 paywall challenge** → ledger → MCP tools. Playable live at [`https://xpay-commerce.onrender.com/xpay-demo.mp4`](https://xpay-commerce.onrender.com/xpay-demo.mp4). Re-record it against the live site with `scripts/live-demo-driver.cjs` (Puppeteer) + an `ffmpeg x11grab` capture.
+- **Demo video:** [`docs/demo/xpay-commerce-demo.mp4`](docs/demo/xpay-commerce-demo.mp4) — real live screen recording (46s, 720p) of the deployed product, including a **real on-chain `$U` paid call**: landing/live market → request studio → HTTP 402 x402 challenge → **a real agent wallet settles `$U` on BSC testnet and the Ledger shows the transaction land live** → MCP tools. Playable live at [`https://xpay-commerce.onrender.com/xpay-demo.mp4`](https://xpay-commerce.onrender.com/xpay-demo.mp4). Re-recordable via `scripts/live-demo-livepay.cjs` (funds a distinct buyer, fires the payment, `ffmpeg x11grab` capture).
 - **Verify it live:** `npm run smoke https://xpay-commerce.onrender.com` → **10 passed, 0 failed**
   (health · live BTC/ETH/SOL preview · 402 paywall ×3 · ledger · budget · MCP SSE · UI).
 - **Docs:** [ARCHITECTURE.md](ARCHITECTURE.md) · [docs/TECHNICAL.md](docs/TECHNICAL.md) · [docs/ROADMAP.md](docs/ROADMAP.md).

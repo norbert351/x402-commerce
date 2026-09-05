@@ -3,3 +3,6 @@ node_modules/
 .env.bnb
 **/data/
 *.log
+demo/.demo-buyer-key
+.demo-buyer-key
+*.local
