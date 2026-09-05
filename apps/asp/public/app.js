@@ -415,7 +415,7 @@
     box.replaceChildren.apply(box, nodes);
     // landing float-chips (lazy — only when the dashboard is live)
     var setChip = function (id, val) { var n = document.getElementById(id); if (n) n.textContent = String(val); };
-    setChip("chip-price", fmtUsd(h.priceUsdc) + " / call");
+    setChip("chip-price", h.amountAtomic != null ? humanAtomic(h.amountAtomic, meta.decimals) + " / call" : fmtUsd(h.priceUsdc) + " / call");
     setChip("chip-chain", chainLabel());
     setChip("chip-paid", paid);
     setChip("chip-budget", budgetHuman(h.budgetAtomic));
