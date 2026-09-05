@@ -250,15 +250,45 @@
 
     // hero
     var hero = el("div", "hero");
-    hero.appendChild(el("h2", "", 'Pay-per-call commerce<br>on <span class="grad">Binance Agent OS</span>'));
-    hero.appendChild(el("p", "", "An AI agent settles on-chain micro-payments through the <b>Open Payments x402</b> protocol to unlock live Binance market data — every call you make changes the ledger. No subscriptions. No API keys. Just pay-per-request."));
-    var badges = el("div", "hero-badges");
-    badges.innerHTML =
-      '<span class="pill teal">x402 · Open Payments v2</span>' +
+    hero.appendChild(el("div", "hero-eyebrow", '<span class="d"></span>&nbsp;x402 · Open Payments v2'));
+    hero.appendChild(el("h2", "", 'Agents pay per call.<br><span class="grad">No subscriptions. No API keys.</span>'));
+    hero.appendChild(el("p", "", "An AI agent settles an on-chain <b>micro-payment</b> through the <b>Open Payments x402</b> protocol to unlock live Binance market data — every call changes the ledger. One transfer, one request, billed atomically."));
+    var cta = el("div", "hero-cta");
+    cta.innerHTML =
+      '<a class="btn btn-primary" href="#/market">Unlock live data <span class="arrow">→</span></a>' +
+      '<a class="btn btn-ghost" href="#/ledger">Open the ledger</a>';
+    hero.appendChild(cta);
+    var heroTrust = el("div", "hero-trust");
+    heroTrust.innerHTML =
+      '<span class="pill teal">x402 · Payment Required</span>' +
       '<span class="pill green">pay-per-call</span>' +
-      '<span class="pill muted">Track A · Payment Workflows</span>';
-    hero.appendChild(badges);
+      '<span class="pill muted">Binance Agent OS</span>';
+    hero.appendChild(heroTrust);
     root.appendChild(hero);
+
+    // x402 payment rail showcase
+    var show = el("div", "showcase");
+    show.innerHTML =
+      '<div class="showcase-annotate"><span>payment rail · sell-side ASP</span><b>HTTP 402 → settle → serve</b></div>' +
+      '<div class="rail">' +
+        '<div class="rail-step"><div class="rs-num">01 · probe</div><div class="rs-title">Agent calls the feed</div>' +
+        '<div class="rs-desc">A buyer agent requests a market resource with no proof of payment yet.</div>' +
+        '<div class="rs-monos"><span class="pill muted">GET /v1/market/BTCUSDT</span></div></div>' +
+        '<div class="rail-link"><span class="rail-sep"></span><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></div>' +
+        '<div class="rail-step"><div class="rs-num">02 · challenge</div><div class="rs-title">Paywall answers 402</div>' +
+        '<div class="rs-desc">The server returns <b>HTTP 402</b> plus an x402 challenge encoding resource, payee and amount.</div>' +
+        '<div class="rs-monos"><span class="pill teal">402 · PAYMENT-REQUIRED</span></div></div>' +
+        '<div class="rail-link"><span class="rail-sep"></span><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></div>' +
+        '<div class="rail-step settle"><div class="rs-num">03 · settle &amp; serve</div><div class="rs-title">One transfer = one request</div>' +
+        '<div class="rs-desc">The agent settles on-chain, signs the EIP-712 payment, replays with a <span style="font-family:var(--mono);color:var(--accent-2)">PAYMENT-SIGNATURE</span> header — and receives the billed payload.</div>' +
+        '<div class="rs-monos"><span class="pill green">200 · live feed</span><span class="pill muted">replay-protected</span></div></div>' +
+      '</div>' +
+      '<div class="chip-wrap">' +
+        '<div class="float-chip"><span class="fc-l">price / call</span><span class="fc-v" id="chip-price">…</span></div>' +
+        '<div class="float-chip"><span class="fc-l">chain · asset</span><span class="fc-v plain" id="chip-chain">…</span></div>' +
+        '<div class="float-chip"><span class="fc-l">paid calls</span><span class="fc-v" id="chip-paid">0</span></div>' +
+      '</div>';
+    root.appendChild(show);
 
     // system status
     var statusCard = el("div", "card mt16");
@@ -332,6 +362,11 @@
       '<div class="small muted mt">budget: ' + esc(budgetHuman(h.budgetAtomic)) + '</div></div>';
     var nodes = Array.from(ip.childNodes);
     box.replaceChildren.apply(box, nodes);
+    // landing float-chips (lazy — only when the dashboard is live)
+    var setChip = function (id, val) { var n = document.getElementById(id); if (n) n.textContent = String(val); };
+    setChip("chip-price", fmtUsd(h.priceUsdc) + " / call");
+    setChip("chip-chain", chainLabel());
+    setChip("chip-paid", paid);
     // pay-to copy row (wrapped + copyable)
     var pt = document.getElementById("payto-card");
     if (h.payTo && pt) {

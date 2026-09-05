@@ -3,35 +3,49 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0a0a0a" />
+  <meta name="theme-color" content="#0A0D12" />
   <title>xPay Commerce — Pay-per-call market data on Binance Agent OS</title>
   <meta name="description" content="AI agents pay micro-payments on-chain via x402 to unlock live Binance market data. A pay-per-call commerce demo on Binance Agent OS." />
-  <link rel="stylesheet" href="styles.css?v=3" />
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+  <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&f[]=general-sans@400,500,600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=4" />
 </head>
 <body>
   <div class="app-shell">
 
     <!-- Sidebar (desktop) -->
     <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-mark">⚡</div>
+      <a href="#/" class="brand" aria-label="xPay Commerce home">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+            <path d="M13 3 5 13h6l-1 8 9-11h-6l0-7z" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/>
+          </svg>
+        </div>
         <div class="brand-text">
           <div class="brand-name">xPay Commerce</div>
           <div class="brand-sub">Binance Agent OS · x402</div>
         </div>
-      </div>
-      <nav class="nav">
+      </a>
+      <nav class="nav" aria-label="Primary">
         <a href="#/" class="nav-item" data-route="/">
-          <span class="nav-ico">◎</span><span class="nav-label">Dashboard</span>
+          <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="9" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="12" width="8" height="9" rx="1.5"/><rect x="3" y="16" width="8" height="5" rx="1.5"/></svg>
+          <span class="nav-label">Dashboard</span>
         </a>
         <a href="#/market" class="nav-item" data-route="/market">
-          <span class="nav-ico">◈</span><span class="nav-label">Market</span>
+          <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19 9 7l4 7 4-9 3 14"/><circle cx="3.5" cy="19" r="1" fill="currentColor" stroke="none"/></svg>
+          <span class="nav-label">Market</span>
         </a>
         <a href="#/ledger" class="nav-item" data-route="/ledger">
-          <span class="nav-ico">≡</span><span class="nav-label">Ledger</span>
+          <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+          <span class="nav-label">Ledger</span>
         </a>
         <a href="#/mcp" class="nav-item" data-route="/mcp">
-          <span class="nav-ico">◉</span><span class="nav-label">MCP for agents</span>
+          <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="2.2"/><circle cx="19" cy="5" r="2.2"/><circle cx="19" cy="19" r="2.2"/><path d="M7 11l10-5M7 13l10 5"/></svg>
+          <span class="nav-label">MCP for agents</span>
         </a>
       </nav>
       <div class="sidebar-foot">
@@ -43,7 +57,12 @@
     <!-- Main -->
     <div class="main">
       <header class="topbar">
-        <a href="#/" class="topbar-brand">⚡ xPay<span>Commerce</span></a>
+        <a href="#/" class="topbar-brand">
+          <span class="tb-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M13 3 5 13h6l-1 8 9-11h-6l0-7z" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/></svg>
+          </span>
+          xPay<span>Commerce</span>
+        </a>
         <div class="topbar-status">
           <span class="live-pill"><span class="live-dot"></span> live</span>
           <span class="base-chip" id="base-chip" title="API base">…</span>
@@ -51,24 +70,30 @@
       </header>
 
       <div class="global-banner hidden" id="global-banner">
-        <span class="gb-ico">⚠</span><span id="global-banner-text"></span>
+        <span class="gb-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 8v5M12 16.5v.5"/><circle cx="12" cy="12" r="9"/></svg>
+        </span><span id="global-banner-text"></span>
         <button class="gb-close" id="global-banner-close" aria-label="dismiss">×</button>
       </div>
 
       <main class="content" id="view-root"></main>
 
       <!-- Mobile bottom nav -->
-      <nav class="bottom-nav">
-        <a href="#/" class="bn-item" data-route="/"><span class="bn-ico">◎</span><span>Home</span></a>
-        <a href="#/market" class="bn-item" data-route="/market"><span class="bn-ico">◈</span><span>Market</span></a>
-        <a href="#/ledger" class="bn-item" data-route="/ledger"><span class="bn-ico">≡</span><span>Ledger</span></a>
-        <a href="#/mcp" class="bn-item" data-route="/mcp"><span class="bn-ico">◉</span><span>MCP</span></a>
+      <nav class="bottom-nav" aria-label="Mobile">
+        <a href="#/" class="bn-item" data-route="/">
+          <svg class="bn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="9" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="12" width="8" height="9" rx="1.5"/><rect x="3" y="16" width="8" height="5" rx="1.5"/></svg><span>Home</span></a>
+        <a href="#/market" class="bn-item" data-route="/market">
+          <svg class="bn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19 9 7l4 7 4-9 3 14"/></svg><span>Market</span></a>
+        <a href="#/ledger" class="bn-item" data-route="/ledger">
+          <svg class="bn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>Ledger</span></a>
+        <a href="#/mcp" class="bn-item" data-route="/mcp">
+          <svg class="bn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="2.2"/><circle cx="19" cy="5" r="2.2"/><circle cx="19" cy="19" r="2.2"/><path d="M7 11l10-5M7 13l10 5"/></svg><span>MCP</span></a>
       </nav>
     </div>
   </div>
 
   <div class="toast-wrap" id="toast-wrap"></div>
 
-  <script src="app.js?v=3" defer></script>
+  <script src="app.js?v=4" defer></script>
 </body>
 </html>
