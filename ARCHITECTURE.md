@@ -47,6 +47,7 @@ ticker / klines), the MCP tools (stdio + HTTP/SSE), and the buy-side CLI. Budget
 | `packages/core/src/x402.js` | x402 v2 challenge + EIP-712 domain/types + encode/decode |
 | `packages/core/src/verify.js` | on-chain verification (verifyTypedData + getLogs Transfer) |
 | `packages/core/src/ledger.js` | node:sqlite ledger + durable replay ring (INSERT OR IGNORE) |
+| `packages/core/src/feeds.js` | self-serve feed registry — publish a feed, set its $U price / daily budget |
 | `packages/core/src/binance.js` | Binance feed (UA + timeout + `data-api.binance.vision` fallback) |
 | `packages/core/src/config.js` | chain-parametrised settlement config |
 | `packages/core/src/mcp-tools.js` | the 3 paid tools, shared across transports |

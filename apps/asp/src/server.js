@@ -2,7 +2,7 @@ import http from 'node:http';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { config, buildChallengeBytes, verifyPayments, createLedger } from '@xpay/core';
+import { config, buildChallengeBytes, verifyPayments, createLedger, createFeeds } from '@xpay/core';
 import { fetchPrice, fetch24hr, fetchKlines } from '@xpay/core/binance.js';
 import { handleMcpRequest } from '@xpay/mcp/http-server.js';
 
@@ -10,8 +10,21 @@ const here = dirname(fileURLToPath(import.meta.url));
 
 // ---- persistent ledger: audit trail + replay ring + per-payer daily spend budget ----
 const ledger = createLedger(new URL('../data/ledger.sqlite', import.meta.url).pathname);
+// ---- self-serve storefront: sellers PUBLISH a feed (symbol/type/$U price/budget) ----
+const feeds = createFeeds(new URL('../data/feeds.sqlite', import.meta.url).pathname);
 const BUDGET_ATOMIC = process.env.XPAY_BUDGET_ATOMIC ? Number(process.env.XPAY_BUDGET_ATOMIC) : null;
 const CHAIN_NAME = config.chainId === 97 ? 'BSC' : config.chainId === 84532 ? 'Base' : String(config.chainId);
+
+// A published feed overrides price / payTo / budget for its resource; otherwise fall back to globals.
+function feedPlan(resource) {
+  const f = feeds.byResource(resource);
+  if (!f) return { amountAtomic: config.amountAtomic, payTo: config.payTo, budgetAtomic: BUDGET_ATOMIC };
+  return {
+    amountAtomic: String(f.price_atomic),
+    payTo: f.pay_to || config.payTo,
+    budgetAtomic: f.budget_atomic != null ? Number(f.budget_atomic) : BUDGET_ATOMIC,
+  };
+}
 
 const PORT = Number(process.env.XPAY_PORT || process.env.PORT || 3000); // Render injects PORT
 
@@ -53,10 +66,11 @@ function sendJson(res, status, obj, headers = {}) {
 const PAID_PREFIX = '/v1/market';
 
 async function servePaid(req, res, resource, symbol) {
+  const plan = feedPlan(resource);
   const replay = req.headers['payment-signature'];
   if (!replay) {
-    const challenge = buildChallengeBytes(resource, `xPay Commerce: ${resource} (live Binance ${symbol.toUpperCase()})`);
-    return sendJson(res, 402, { error: 'payment required', resource, hint: 'settle on-chain then replay with PAYMENT-SIGNATURE' }, {
+    const challenge = buildChallengeBytes(resource, `xPay Commerce: ${resource} (live Binance ${symbol.toUpperCase()})`, { amountAtomic: plan.amountAtomic, payTo: plan.payTo });
+    return sendJson(res, 402, { error: 'payment required', resource, priceAtomic: plan.amountAtomic, hint: 'settle on-chain then replay with PAYMENT-SIGNATURE' }, {
       'PAYMENT-REQUIRED': challenge,
       'WWW-Authenticate': 'Payment x402Version="2"',
     });
@@ -65,10 +79,10 @@ async function servePaid(req, res, resource, symbol) {
     .then(async ({ payer, txHash }) => {
       let charge;
       try {
-        charge = ledger.charge({ txHash, payer, resource, amountAtomic: config.amountAtomic, chainId: config.chainId, chainName: CHAIN_NAME, asset: config.asset, budgetAtomic: BUDGET_ATOMIC });
+        charge = ledger.charge({ txHash, payer, resource, amountAtomic: plan.amountAtomic, chainId: config.chainId, chainName: CHAIN_NAME, asset: config.asset, budgetAtomic: plan.budgetAtomic });
       } catch (ce) { throw { code: 'db_charge_error', detail: ce.message }; }
       if (!charge.ok) {
-        if (charge.code === 'budget_exceeded') throw { code: 'budget_exceeded', detail: `daily ${charge.dailyAtomic}/${BUDGET_ATOMIC} atomic` };
+        if (charge.code === 'budget_exceeded') throw { code: 'budget_exceeded', detail: `daily ${charge.dailyAtomic}/${plan.budgetAtomic} atomic` };
         if (charge.code === 'already_banked') throw { code: 'payment_already_used', detail: 'tx already consumed' };
       }
       const data = await datumFor(resource, symbol);
@@ -126,6 +140,26 @@ const server = http.createServer((req, res) => {
     return sendJson(res, 200, { budgetAtomic: BUDGET_ATOMIC, byPayer });
   }
 
+  // storefront — self-serve "publish a paid feed" (symbol/type/$U price/budget)
+  if (url.pathname === '/api/feeds' && req.method === 'GET') {
+    return sendJson(res, 200, {
+      feeds: feeds.list(), defaultPriceAtomic: config.amountAtomic, defaultPayTo: config.payTo,
+      decimals: config.decimals, chainId: config.chainId, asset: config.asset,
+    });
+  }
+  if (url.pathname === '/api/feeds' && req.method === 'POST') {
+    let body = '';
+    req.on('data', (c) => (body += c));
+    req.on('end', () => {
+      try {
+        const b = JSON.parse(body || '{}');
+        const feed = feeds.create({ symbol: b.symbol, type: b.type, priceAtomic: b.priceAtomic, budgetAtomic: b.budgetAtomic, payTo: b.payTo, note: b.note });
+        sendJson(res, 201, { ok: true, feed });
+      } catch (e) { sendJson(res, 400, { error: 'bad_request', detail: e.message }); }
+    });
+    return;
+  }
+
   // FREE live preview (teaser for the dashboard; no payment)
   const preview = url.pathname.match(/^\/v1\/preview\/([A-Za-z0-9-]+)$/);
   if (preview) {
@@ -161,10 +195,11 @@ const server = http.createServer((req, res) => {
 });
 
 async function servePaidKlines(req, res, resource, symbol, interval, limit) {
+  const plan = feedPlan(resource);
   const replay = req.headers['payment-signature'];
   if (!replay) {
-    const challenge = buildChallengeBytes(resource, `xPay Commerce: ${resource} (live Binance ${symbol.toUpperCase()})`);
-    return sendJson(res, 402, { error: 'payment required', resource, hint: 'settle on-chain then replay with PAYMENT-SIGNATURE' }, {
+    const challenge = buildChallengeBytes(resource, `xPay Commerce: ${resource} (live Binance ${symbol.toUpperCase()})`, { amountAtomic: plan.amountAtomic, payTo: plan.payTo });
+    return sendJson(res, 402, { error: 'payment required', resource, priceAtomic: plan.amountAtomic, hint: 'settle on-chain then replay with PAYMENT-SIGNATURE' }, {
       'PAYMENT-REQUIRED': challenge,
       'WWW-Authenticate': 'Payment x402Version="2"',
     });
@@ -173,10 +208,10 @@ async function servePaidKlines(req, res, resource, symbol, interval, limit) {
     .then(async ({ payer, txHash }) => {
       let charge;
       try {
-        charge = ledger.charge({ txHash, payer, resource, amountAtomic: config.amountAtomic, chainId: config.chainId, chainName: CHAIN_NAME, asset: config.asset, budgetAtomic: BUDGET_ATOMIC });
+        charge = ledger.charge({ txHash, payer, resource, amountAtomic: plan.amountAtomic, chainId: config.chainId, chainName: CHAIN_NAME, asset: config.asset, budgetAtomic: plan.budgetAtomic });
       } catch (ce) { throw { code: 'db_charge_error', detail: ce.message }; }
       if (!charge.ok) {
-        if (charge.code === 'budget_exceeded') throw { code: 'budget_exceeded', detail: `daily ${charge.dailyAtomic}/${BUDGET_ATOMIC} atomic` };
+        if (charge.code === 'budget_exceeded') throw { code: 'budget_exceeded', detail: `daily ${charge.dailyAtomic}/${plan.budgetAtomic} atomic` };
         if (charge.code === 'already_banked') throw { code: 'payment_already_used', detail: 'tx already consumed' };
       }
       const klines = await fetchKlines(symbol, interval, limit);

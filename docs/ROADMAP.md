@@ -6,8 +6,9 @@ judged demo to a product. Nothing here is claimed as built.
 ## Today (live, verified)
 - Pay-per-call x402 gate over the live Binance feed — BSC testnet / `$U`.
 - Replay protection + per-payer daily budget + a durable on-chain audit ledger.
-- THREE surfaces: REST feed, MCP tools (stdio + HTTP/SSE), buy-side CLI.
-- Landing + product dashboard (Market / Ledger / MCP) on `https://xpay-commerce.onrender.com`.
+- Three surfaces: REST feed, MCP tools (stdio + HTTP/SSE), buy-side CLI.
+- **Self-serve storefront: publish any Binance feed as a paid endpoint** (symbol/type/$U price/optional daily budget) — a reusable rail, not a fixed demo catalog.
+- Landing + product dashboard (Market / Ledger / Storefront / MCP) on `https://xpay-commerce.onrender.com`.
 
 ## Next (build order, grounded in what's real)
 1. **BNB mainnet flip.** The rail is chain-agnostic and verified on testnet; mainnet is a

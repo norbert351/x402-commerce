@@ -65,6 +65,14 @@ Free teaser (no payment) that powers the live landing panel:
 Other public endpoints: `/health` (live config + payTo + budget + ledger count),
 `/ledger` (payments), `/budget` (per-payer spend).
 
+### Self-serve storefront (the reusable rail)
+`GET /api/feeds` (list) + `POST /api/feeds` (`{symbol, type, priceAtomic, budgetAtomic?, payTo?}`)
+let a seller **publish a paid feed** in one call. A published feed overrides that resource's
+price / optional daily budget / payTo in the gate, while anything unpublished falls back to
+the global config — so the default path is byte-for-byte unchanged (verified by the test
+suite). This is what makes xPay a *publish-able agent-payments rail* rather than a fixed
+demo catalog.
+
 ## MCP surface (`apps/mcp`, same paid tools)
 
 | Tool | Resource |
@@ -85,7 +93,7 @@ PAYMENT-SIGNATURE → 200`. The agent wallet never touches a subscription or an 
 
 ## Tests
 
-`npm test` — **22/22 passing** (unit: challenge/replay envelope, EIP-712 field match,
+`npm test` — **27/27 passing** (unit: challenge/replay envelope, EIP-712 field match,
 amount-atomic derivation, ledger integrate, budget per-payer + UTC-midnight reset,
 MCP stdio, BNB-rail negatives) plus the replay-protection proof
 (`apps/buyer/src/e2e-replay.mjs`: first replay 200, second `payment_already_used`).

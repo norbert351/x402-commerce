@@ -65,6 +65,7 @@
     return fetch(BASE + path, {
       method: opts.method || "GET",
       headers: opts.headers || {},
+      body: opts.body || undefined,
       signal: opts.signal || AbortSignal.timeout(15000),
     }).then(function (r) {
       return { status: r.status, ok: r.ok, headers: r.headers, text: r.text.bind(r) };
@@ -193,6 +194,7 @@
     "/": renderDashboard,
     "/market": renderMarket,
     "/ledger": renderLedger,
+    "/publish": renderPublish,
     "/mcp": renderMcp,
   };
 
@@ -889,6 +891,113 @@
       card.appendChild(cardHead("Spend budget", "per payer · GET /budget"));
       var div = el("div"); div.innerHTML = html; card.appendChild(div);
     }).catch(function (e) { if (card && card.querySelector("[data-role]")) handleApiFail(e, true); });
+  }
+
+  /* =========================================================
+     STOREFRONT — self-serve "publish a paid feed" rail
+     ========================================================= */
+  var sfDecimals = 6;
+
+  function renderPublish() {
+    var root = viewRoot;
+    root.innerHTML = "";
+
+    var head = el("div", "view-head");
+    head.appendChild(el("div", "view-eyebrow", "Self-serve rail · Payment Workflows"));
+    head.appendChild(el("h1", "view-title", "Publish a paid feed"));
+    head.appendChild(el("p", "view-desc", "Turn any Binance symbol/resource into an x402-priced endpoint in one click. Set the $U price (and an optional per-payer daily budget) — every call settles on-chain and hits the replay-protected ledger. It is a rail, not a demo."));
+    root.appendChild(head);
+
+    // publish form
+    var formCard = el("div", "card");
+    formCard.appendChild(cardHead("Publish a feed", "set price + rule"));
+    var row = el("div", "field-row");
+    row.innerHTML =
+      '<div class="field"><label>Symbol</label><input class="input" id="sf-sym" value="LINKUSDT" spellcheck="false" placeholder="BTCUSDT"></div>' +
+      '<div class="field"><label>Resource</label><select class="input" id="sf-type">' +
+      '<option value="spot">Spot · /v1/market/:sym</option>' +
+      '<option value="ticker" selected>24h ticker · :sym/ticker</option>' +
+      '<option value="klines">Candles · :sym/klines</option></select></div>' +
+      '<div class="field"><label>Price / call ($U)</label><input class="input" id="sf-price" value="0.00005" step="any"></div>' +
+      '<div class="field"><label>Daily budget / payer ($U, optional)</label><input class="input" id="sf-budget" placeholder="e.g. 0.002 = cap"></div>';
+    var actions = el("div", "field-row mt16");
+    actions.innerHTML = '<button class="btn btn-primary" id="sf-create"><span class="spin dark hidden" id="sf-spin"></span> Publish feed</button>';
+    row.appendChild(actions);
+    formCard.appendChild(row);
+    formCard.appendChild(el("div", "small muted mt16", "Price is stored as atomic units of the settle asset (" + (meta.chainId === 97 ? "$U, 18-dec" : "USDC, 6-dec") + "). A per-payer daily budget caps one wallet's spend per day on this feed — leave blank for uncapped."));
+    root.appendChild(formCard);
+
+    // published feeds
+    var listCard = el("div", "card mt16");
+    listCard.appendChild(cardHead("Published feeds", "live endpoints"));
+    var tw = el("div", "table-wrap");
+    tw.innerHTML = '<table><thead><tr><th>feed</th><th>price</th><th>budget</th><th>resource</th><th>payto</th><th></th></tr></thead><tbody id="sf-tbody"><tr><td colspan="6"><div class="loading-box"><span class="spin"></span> loading storefront…</div></td></tr></tbody></table>';
+    listCard.appendChild(tw);
+    listCard.appendChild(el("div", "small muted mt", '<span class="pill teal">x402-priced</span> <span class="pill green">replay-proof</span> <span class="pill muted">keyless seller</span>'));
+    root.appendChild(listCard);
+
+    document.getElementById("sf-create").addEventListener("click", publishFeed);
+    loadFeeds();
+
+    refreshMeta().then(function (h) { if (h && h.decimals != null) sfDecimals = Number(h.decimals); });
+  }
+
+  function atomicFromUsd(usd, dec) {
+    var thousands = Math.round(Number(usd) * Math.pow(10, dec));
+    return String(thousands);
+  }
+  function usdFromAtomic(a, dec) {
+    return Number(a) / Math.pow(10, dec);
+  }
+
+  function publishFeed() {
+    var spin = document.getElementById("sf-spin");
+    var btn = document.getElementById("sf-create");
+    if (spin) spin.classList.remove("hidden");
+    if (btn) btn.disabled = true;
+    var dec = sfDecimals;
+    var body = {
+      symbol: document.getElementById("sf-sym") ? normSymbol(document.getElementById("sf-sym").value) || "BTCUSDT" : "BTCUSDT",
+      type: (document.getElementById("sf-type") && document.getElementById("sf-type").value) || "ticker",
+      priceAtomic: atomicFromUsd(document.getElementById("sf-price").value, dec),
+    };
+    var budget = document.getElementById("sf-budget") && document.getElementById("sf-budget").value;
+    if (budget && budget.trim() !== "") body.budgetAtomic = atomicFromUsd(budget, dec);
+    api("/api/feeds", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+      .then(function (r) {
+        if (r.status === 201) { toast("Feed published — " + (r.json.feed && r.json.feed.resource), "success"); loadFeeds(); }
+        else toast("Publish failed: " + ((r.json && r.json.detail) || r.status), "error");
+      })
+      .catch(function (e) { toast(e.message || "Publish failed", "error"); })
+      .finally(function () { if (spin) spin.classList.add("hidden"); if (btn) btn.disabled = false; });
+  }
+
+  function loadFeeds() {
+    var tb = document.getElementById("sf-tbody");
+    api("/api/feeds").then(function (r) {
+      if (tb) tb.innerHTML = "";
+      if (!r.ok || !r.json) { if (tb) tb.innerHTML = '<tr><td colspan="6"><div class="empty-state">Storefront unavailable</div></td></tr>'; return; }
+      var dec = r.json.decimals != null ? Number(r.json.decimals) : sfDecimals;
+      sfDecimals = dec;
+      var list = r.json.feeds || [];
+      if (!list.length) {
+        if (tb) tb.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="es-ico">⬦</div><div class="es-title">No feeds published yet</div><div class="small">Publish your first feed above — it becomes a live pay-per-call endpoint + MCP tool.</div></div></td></tr>';
+        return;
+      }
+      var html = "";
+      list.forEach(function (f) {
+        var res = (f.resource || '').replace(/^\//, '');
+        html += '<tr>' +
+          '<td class="mono">' + esc(f.symbol) + ' <span class="pill muted">' + esc(f.type) + '</span></td>' +
+          '<td class="mono">' + usdFromAtomic(f.price_atomic, dec).toLocaleString(undefined, { maximumFractionDigits: 6 }) + ' $U</td>' +
+          '<td class="small">' + (f.budget_atomic != null ? usdFromAtomic(f.budget_atomic, dec).toLocaleString() + ' $U' : "uncapped") + '</td>' +
+          '<td class="mono small">' + esc(res) + '</td>' +
+          '<td class="mono small muted">' + esc(shortAddr(f.pay_to || "—")) + '</td>' +
+          '<td><button class="copy-btn" data-clip="' + esc(BASE + "/" + res) + '" title="copy endpoint">⧉</button></td>' +
+          '</tr>';
+      });
+      if (tb) tb.innerHTML = html;
+    }).catch(function (e) { if (tb) tb.innerHTML = '<tr><td colspan="6"><div class="small muted">Storefront unreachable: ' + esc(e.message || "") + '</div></td></tr>'; });
   }
 
   /* =========================================================

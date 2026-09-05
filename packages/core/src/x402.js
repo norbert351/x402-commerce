@@ -17,14 +17,17 @@ export const EIP712_TYPES = {
 
 // The accepted entry the buyer signs. Every field is bound into the signed message,
 // so underpayment / redirect-to-wrong-asset / overlong-timeout are all rejected at sign time.
-export function acceptedEntry(resource, description) {
+// `override` lets a PUBLISHED feed (storefront) set its own price / payTo; unset fields fall
+// back to the global config so the default path is byte-for-byte unchanged.
+export function acceptedEntry(resource, description, override) {
+  override = override || {};
   return {
     scheme: 'exact',
     network: config.network,
     chainId: config.chainId,
     asset: config.asset,
-    amount: config.amountAtomic,
-    payTo: config.payTo,
+    amount: String(override.amountAtomic || config.amountAtomic),
+    payTo: (override.payTo || config.payTo).toLowerCase(),
     maxTimeoutSeconds: config.maxTimeoutSeconds,
     description,
     extra: JSON.stringify({ name: tokenLabel(), version: '2' }), // MUST be a string; label tracks the settle asset
@@ -50,8 +53,9 @@ export function toPaymentMessage(accepted) {
 }
 
 // Build the b64 challenge sent in the PAYMENT-REQUIRED header on a 402 response.
-export function buildChallengeBytes(resource, description) {
-  const challenge = { x402Version: 2, error: 'Payment required', accepts: [acceptedEntry(resource, description)], resource };
+// `override` (optional) = published-feed pricing {amountAtomic, payTo}.
+export function buildChallengeBytes(resource, description, override) {
+  const challenge = { x402Version: 2, error: 'Payment required', accepts: [acceptedEntry(resource, description, override)], resource };
   return Buffer.from(JSON.stringify(challenge)).toString('base64');
 }
 

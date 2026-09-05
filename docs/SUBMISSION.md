@@ -25,11 +25,14 @@ pains the same builders: someone running a valuable Binance feed has no drop-in 
 
 **Why it stands out** (the payment/paid-MCP lane is filling up — security-preflight nodes,
 generic paid-MCP infrastructure, agentic-payments policy gates). xPay is different because
-it targets the *agent-to-agent payments on Binance market data* itself, and its trust layer
-is the differentiator: the paid endpoints ARE Binance Agent OS MCP market tools (sponsor
-tech load-bearing, settled in `$U`), the seller holds **no private key** (buyer signs
-off-VM), there's a **per-payer daily budget set once**, and a **replay-proof ledger** —
-one transfer = one request — provable live in the demo with a real on-chain `$U` settlement.
+it targets the *agent-to-agent payments on Binance market data* itself as a **self-serve
+storefront**: publish any Binance feed as a paid endpoint in one call (symbol/type/`$U`
+price/optional daily budget via `/api/feeds`), and the same x402 gate prices it per-call.
+Its trust layer is the differentiator: the paid endpoints ARE Binance Agent OS MCP market
+tools (sponsor tech load-bearing, settled in `$U`), the seller holds **no private key**
+(buyer signs off-VM), there's a **per-payer daily budget set once**, and a **replay-proof
+ledger** — one transfer = one request — provable live in the demo with a real on-chain
+`$U` settlement.
 
 ---
 
@@ -154,7 +157,7 @@ Then the agent can call the three paid tools (`get_market_data`, `get_quote`,
 endpoint: `https://xpay-commerce.onrender.com/mcp`.
 
 ### Verify
-- `npm test` → **22/22 passing**.
+- `npm test` → **27/27 passing**.
 - `npm run smoke https://xpay-commerce.onrender.com` → **10/10** (health · live preview ·
   402 paywalls · ledger · budget · MCP SSE · UI).
 - See every settled payment at `GET /ledger` and per-payer spend at `GET /budget`.
