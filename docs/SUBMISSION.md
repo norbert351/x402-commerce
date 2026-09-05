@@ -8,25 +8,57 @@ code-verified + smoke-tested live.
 
 ---
 
+## Problem · Audience · Why it stands out
+
+**Problem.** AI agents consume data on demand, but there is no machine-native way to pay
+for a single call — they get forced toward subscriptions and shared API keys. The inverse
+pains the same builders: someone running a valuable Binance feed has no drop-in way to
+**charge per request**.
+
+**Audience** — two-sided, both named:
+- **Sellers (day-one adopters):** developers/analysts running a live Binance market-data,
+  signal, or analysis feed who want to monetize it *by the call* — set a `$U` price + a
+  daily spend budget, no KYC, no subscription infra.
+- **Buyers:** AI agents (on Agent OS, Claude Code, Cursor) that need live data now and
+  auto-settle per call.
+- **Who it is NOT for:** bulk/subscription merchandisers — x402 is deliberately per-call.
+
+**Why it stands out** (the payment/paid-MCP lane is filling up — security-preflight nodes,
+generic paid-MCP infrastructure, agentic-payments policy gates). xPay is different because
+it targets the *agent-to-agent payments on Binance market data* itself, and its trust layer
+is the differentiator: the paid endpoints ARE Binance Agent OS MCP market tools (sponsor
+tech load-bearing, settled in `$U`), the seller holds **no private key** (buyer signs
+off-VM), there's a **per-payer daily budget set once**, and a **replay-proof ledger** —
+one transfer = one request — provable live in the demo with a real on-chain `$U` settlement.
+
+---
+
 ## Q — Which theme does your submission fall under?
 
 **Payment Workflows (E.g. Agent-to-Agent payments)**
 
-> xPay Commerce is an **Agent-to-Agent payments** build: an AI agent pays a micro-payment
-> on-chain, per request, through the **x402 / Open Payments v2** protocol, to unlock a
-> gated Binance market-data endpoint. No subscriptions, no shared API keys — agents pay a
-> few cents per call.
+> xPay Commerce is an **Agent-to-Agent payments** storefront on Binance Agent OS: an AI
+> agent pays a micro-payment on-chain, per request, through **x402 / Open Payments v2**,
+> to unlock a gated Binance market-data endpoint. It's the "agents paying agents" rail for
+> the Payment Workflows lane — with a keyless seller, a budget set once, and a replay-proof
+> ledger. No subscriptions, no shared API keys.
 
 ---
 
 ## Q — Text description of your project
 
-**xPay Commerce** turns any Binance market-data / analysis / signal feed into a
-**pay-per-call x402 endpoint** so an AI agent pays a micro-payment *per request* on-chain
-and gets the data in return. It is the "agents paying agents" pattern, built natively on
-viem + the live Binance feed, settled on-chain in **$U** (BSC testnet), wrapped in a trust
-layer: a per-payer daily budget the seller sets once, an executor that never holds the key,
-and a replay-protected ledger where **one on-chain transfer = one request**.
+**xPay Commerce** is a **pay-per-call storefront** that turns any Binance market-data /
+analysis / signal feed into an **x402-priced endpoint** — so an AI agent pays a
+micro-payment *per request* on-chain and gets the data in return. Two-sided commerce for
+the agent economy: a seller prices a Binance feed per call, and any agent pays a few cents,
+on its own, without an account or an API key.
+
+Built natively on viem + the live Binance feed, settled on-chain in **$U** (BSC testnet),
+wrapped in an agent-trust layer that is the heart of the build:
+- **Seller holds no private key** — the buyer signs off-VM, so the selling server is keyless by design.
+- **Per-payer daily budget, set once** — a spend cap enforced at settlement, so an agent can't drain a seller.
+- **One transfer = one request** — a durable replay ring means a paid transaction is consumed exactly once (replay rejected: `payment_already_used`).
+- **Immutable on-chain ledger** — every settled call is an audit row (tx hash, payer, resource, amount).
 
 The workhorse flow an AI agent runs:
 
@@ -43,8 +75,7 @@ The workhorse flow an AI agent runs:
 Removal of the x402 gate ⟹ the paywall disappears ⟹ it is no longer pay-per-call. The
 protocol **is** the product. The same gate serves **three surfaces**: the REST feed
 (spot / 24h ticker / klines), **MCP tools** (`get_market_data`, `get_quote`,
-`get_klines` — stdio + HTTP/SSE for remote agents), and a buy-side agent CLI. Every settled
-call is recorded in an immutable on-chain-backed ledger with replay protection.
+`get_klines` — stdio + HTTP/SSE for remote agents), and a buy-side agent CLI.
 
 ---
 
@@ -53,7 +84,7 @@ call is recorded in an immutable on-chain-backed ledger with replay protection.
 **YouTube** (recommended for judges) — upload `docs/demo/xpay-commerce-demo.mp4` and paste
 the public link.
 
-> **Immediate fallback ("Others"):** the same 37s 720p file is served at
+> **Immediate fallback ("Others"):** the same 60s 720p file is served at
 > `https://xpay-commerce.onrender.com/xpay-demo.mp4`.
 
 ---
@@ -63,8 +94,11 @@ the public link.
 _Paste the YouTube URL after uploading._ (Fallback: `https://xpay-commerce.onrender.com/xpay-demo.mp4`.)
 
 The video is a **real live screen recording** (not slides/static frames) of the deployed
-product: landing → live market feed (real BTC/ETH/SOL prices + sparklines) → request studio
-→ **HTTP 402 x402 paywall challenge** → ledger → MCP tools, with synced narration.
+product, with **real clicks on every feature**: landing → live market feed (real
+BTC/ETH/SOL prices + sparklines) → request studio (type a symbol, pick a resource) → **HTTP
+402 x402 paywall challenge** (+ decoded) → **a real agent wallet settles `$U` on BSC
+testnet and the Ledger shows the transaction land live** → Ledger overview/budget → MCP
+tools. With clean synced narration.
 
 ---
 
