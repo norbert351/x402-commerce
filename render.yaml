@@ -5,7 +5,7 @@ services:
   - type: web
     name: xpay-commerce
     runtime: node
-    rootDir: /
+    rootDir: .
     buildCommand: npm ci
     startCommand: node --dns-result-order=ipv4first apps/asp/src/server.js
     healthCheckPath: /health
