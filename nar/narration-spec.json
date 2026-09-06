@@ -1,0 +1,24 @@
+{
+  "window": 76.0,
+  "voice": "en-US-ChristopherNeural",
+  "rate": "+34%",
+  "lines": [
+    [0.9, "This is xPay Commerce, pay-per-call commerce on Binance Agent OS."],
+    [3.1, "Live Binance market data, streaming in real time."],
+    [4.0, "Open the Market request studio."],
+    [7.0, "Choose a symbol and a feed, real typing, real clicks."],
+    [10.6, "Unlock live data. Unpaid requests get a real HTTP four-oh-two with an x402 challenge."],
+    [13.5, "Any unfunded call returns the decoded paywall challenge."],
+    [15.9, "Now a real agent wallet settles dollars on BNB testnet, during this take."],
+    [24.9, "The on-chain payment lands on the network."],
+    [31.0, "The ledger updates live, real payer, real transaction, BSC testnet."],
+    [34.0, "Spend overview plus per-payer daily budget caps."],
+    [38.5, "The same paid tools are exposed to agents over MCP."],
+    [40.4, "Copy-paste config for Claude, Codex, or Cursor."],
+    [41.7, "Sell side, the storefront. Publish any Binance feed as a paid endpoint."],
+    [43.0, "Type a symbol, set the price and budget."],
+    [44.9, "One click publish, a live keyless, replay-safe endpoint."],
+    [47.9, "Every call settles on-chain to your wallet. No keys on the server."],
+    [50.4, "xPay Commerce, agents paying agents in micro-payments, live on Render."]
+  ]
+}
